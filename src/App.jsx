@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import MatrixInput from './components/MatrixInput';
 import Visualizer from './components/Visualizer';
-import { solveGaussElimination, solveJacobi } from './utils/solverLogic';
+import { solveGaussElimination, solveGaussEliminationWithPivoting, solveJacobi, solveGaussSeidel } from './utils/solverLogic';
 import { Play, Pause, SkipBack, SkipForward, RotateCcw } from 'lucide-react';
 
 function App() {
@@ -41,8 +41,12 @@ function App() {
     let result;
     if (method === 'gauss') {
       result = solveGaussElimination(matrix, vector);
+    } else if (method === 'pivoting') {
+      result = solveGaussEliminationWithPivoting(matrix, vector);
     } else if (method === 'jacobi') {
       result = solveJacobi(matrix, vector);
+    } else if (method === 'seidel') {
+      result = solveGaussSeidel(matrix, vector);
     }
     // Add other methods here...
     
@@ -51,16 +55,18 @@ function App() {
 
   // --- ANIMATION LOOP ---
   useEffect(() => {
-    let interval;
-    if (isPlaying && steps && currentStepIndex < steps.steps.length - 1) {
-      interval = setInterval(() => {
-        setCurrentStepIndex(prev => prev + 1);
-      }, speed);
-    } else if (currentStepIndex >= steps?.steps.length - 1) {
-      setIsPlaying(false);
-    }
+    if (!isPlaying || !steps) return;
+    const interval = setInterval(() => {
+      setCurrentStepIndex(prev => {
+        if (prev >= steps.steps.length - 1) {
+          setIsPlaying(false);
+          return prev;
+        }
+        return prev + 1;
+      });
+    }, speed);
     return () => clearInterval(interval);
-  }, [isPlaying, currentStepIndex, steps, speed]);
+  }, [isPlaying, steps, speed]);
 
   return (
     <div className="min-h-screen bg-slate-50 p-4 font-sans text-gray-800">
@@ -82,9 +88,9 @@ function App() {
                 className="w-full border p-2 rounded"
               >
                 <option value="gauss">Gauss Elimination (Basic)</option>
-                <option value="pivoting" disabled>Gauss with Pivoting (Todo)</option>
+                <option value="pivoting">Gauss with Pivoting</option>
                 <option value="jacobi">Jacobi Iteration</option>
-                <option value="seidel" disabled>Gauss-Seidel (Todo)</option>
+                <option value="seidel">Gauss-Seidel</option>
               </select>
             </div>
 
