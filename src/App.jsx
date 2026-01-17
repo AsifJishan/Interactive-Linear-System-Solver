@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import MatrixInput from './components/MatrixInput';
 import Visualizer from './components/Visualizer';
-import { solveGaussElimination, solveGaussEliminationWithPivoting, solveJacobi, solveGaussSeidel } from './utils/solverLogic';
+import { solveGaussElimination, solveGaussEliminationWithPivoting, solveGaussJordan, solveJacobi, solveGaussSeidel } from './utils/solverLogic';
 import { Play, Pause, SkipBack, SkipForward, RotateCcw } from 'lucide-react';
 
 function App() {
@@ -43,6 +43,8 @@ function App() {
       result = solveGaussElimination(matrix, vector);
     } else if (method === 'pivoting') {
       result = solveGaussEliminationWithPivoting(matrix, vector);
+    } else if (method === 'gauss-jordan') {
+      result = solveGaussJordan(matrix, vector);
     } else if (method === 'jacobi') {
       result = solveJacobi(matrix, vector);
     } else if (method === 'seidel') {
@@ -71,7 +73,7 @@ function App() {
   return (
     <div className="min-h-screen bg-slate-50 p-4 font-sans text-gray-800">
       <header className="max-w-4xl mx-auto mb-8 text-center">
-        <h1 className="text-3xl font-extrabold text-blue-900">Interactive Linear System Solver</h1>
+        <h1 className="text-3xl font-extrabold text-blue-900">Interactive Linear System Solver by team WiFi Problem</h1>
         <p className="text-gray-600">Visualize Numerical Methods Step-by-Step</p>
       </header>
 
@@ -89,6 +91,7 @@ function App() {
               >
                 <option value="gauss">Gauss Elimination (Basic)</option>
                 <option value="pivoting">Gauss with Pivoting</option>
+                <option value="gauss-jordan">Gauss-Jordan Elimination</option>
                 <option value="jacobi">Jacobi Iteration</option>
                 <option value="seidel">Gauss-Seidel</option>
               </select>

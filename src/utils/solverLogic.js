@@ -20,13 +20,20 @@ export const solveGaussElimination = (matrix, vector) => {
     let n = A.length;
     let steps = [];
 
-    // 1. Forward Elimination
+    steps.push({
+        matrix: copyMatrix(A),
+        vector: copyVector(b),
+        description: "Gauss Elimination (NO PIVOTING) - Forward elimination without row swaps",
+        highlights: {}
+    });
+
+    // 1. Forward Elimination (NO PIVOTING)
     for (let k = 0; k < n; k++) {
         // Record step: Pivot Selection
         steps.push({
             matrix: copyMatrix(A),
             vector: copyVector(b),
-            description: `Step ${k+1}: Select pivot A[${k}][${k}] = ${A[k][k].toFixed(2)}`,
+            description: `[NO PIVOTING] Step ${k+1}: Use diagonal element A[${k}][${k}] = ${A[k][k].toFixed(2)} as pivot (no row search)`,
             highlights: { cells: [[k, k]] }
         });
 
@@ -132,6 +139,13 @@ export const solveGaussEliminationWithPivoting = (matrix, vector) => {
     let n = A.length;
     let steps = [];
 
+    steps.push({
+        matrix: copyMatrix(A),
+        vector: copyVector(b),
+        description: "Gauss Elimination with PARTIAL PIVOTING - Search for largest pivot to improve stability",
+        highlights: {}
+    });
+
     // 1. Forward Elimination with Pivoting
     for (let k = 0; k < n; k++) {
         // Find pivot row
@@ -149,7 +163,7 @@ export const solveGaussEliminationWithPivoting = (matrix, vector) => {
             steps.push({
                 matrix: copyMatrix(A),
                 vector: copyVector(b),
-                description: `Pivoting: Swap Row ${k} with Row ${pivotRow}`,
+                description: `[PIVOTING] Swap Row ${k} ↔ Row ${pivotRow} (found larger pivot: ${A[k][k].toFixed(2)})`,
                 highlights: { rows: [k, pivotRow] }
             });
         }
@@ -158,7 +172,7 @@ export const solveGaussEliminationWithPivoting = (matrix, vector) => {
         steps.push({
             matrix: copyMatrix(A),
             vector: copyVector(b),
-            description: `Step ${k+1}: Select pivot A[${k}][${k}] = ${A[k][k].toFixed(2)}`,
+            description: `[PIVOTING] Step ${k+1}: Selected pivot A[${k}][${k}] = ${A[k][k].toFixed(2)} (largest in column)`,
             highlights: { cells: [[k, k]] }
         });
 
@@ -202,6 +216,93 @@ export const solveGaussEliminationWithPivoting = (matrix, vector) => {
             highlights: { rows: [i] }
         });
     }
+
+    return { steps, solution: x, type: 'direct' };
+};
+
+// --- DIRECT METHOD: Gauss-Jordan Elimination ---
+export const solveGaussJordan = (matrix, vector) => {
+    let A = copyMatrix(matrix);
+    let b = copyVector(vector);
+    let n = A.length;
+    let steps = [];
+
+    // 1. Forward and Backward Elimination (to RREF)
+    for (let k = 0; k < n; k++) {
+        // Find pivot row (partial pivoting for stability)
+        let pivotRow = k;
+        for (let i = k + 1; i < n; i++) {
+            if (Math.abs(A[i][k]) > Math.abs(A[pivotRow][k])) {
+                pivotRow = i;
+            }
+        }
+
+        // Swap rows if necessary
+        if (pivotRow !== k) {
+            [A[k], A[pivotRow]] = [A[pivotRow], A[k]];
+            [b[k], b[pivotRow]] = [b[pivotRow], b[k]];
+            steps.push({
+                matrix: copyMatrix(A),
+                vector: copyVector(b),
+                description: `Pivoting: Swap Row ${k} with Row ${pivotRow}`,
+                highlights: { rows: [k, pivotRow] }
+            });
+        }
+
+        // Record step: Pivot Selection
+        steps.push({
+            matrix: copyMatrix(A),
+            vector: copyVector(b),
+            description: `Step ${k+1}: Select pivot A[${k}][${k}] = ${A[k][k].toFixed(2)}`,
+            highlights: { cells: [[k, k]] }
+        });
+
+        // Normalize pivot row
+        let pivotValue = A[k][k];
+        for (let j = k; j < n; j++) {
+            A[k][j] = A[k][j] / pivotValue;
+        }
+        b[k] = b[k] / pivotValue;
+
+        steps.push({
+            matrix: copyMatrix(A),
+            vector: copyVector(b),
+            description: `Normalize Row ${k}: Divide by ${pivotValue.toFixed(2)}`,
+            highlights: { rows: [k] }
+        });
+
+        // Eliminate column (both above and below pivot)
+        for (let i = 0; i < n; i++) {
+            if (i !== k) {
+                let factor = A[i][k];
+                
+                steps.push({
+                    matrix: copyMatrix(A),
+                    vector: copyVector(b),
+                    description: `Eliminating Row ${i}: R${i} = R${i} - (${factor.toFixed(2)}) * R${k}`,
+                    highlights: { rows: [i, k], cells: [[i, k]] }
+                });
+
+                for (let j = k; j < n; j++) {
+                    A[i][j] = A[i][j] - factor * A[k][j];
+                }
+                b[i] = b[i] - factor * b[k];
+            }
+        }
+    }
+
+    // 2. Extract solution (diagonal matrix form gives direct solution)
+    let x = new Array(n).fill(0);
+    for (let i = 0; i < n; i++) {
+        x[i] = b[i];
+    }
+
+    steps.push({
+        matrix: copyMatrix(A),
+        vector: copyVector(b),
+        description: "Gauss-Jordan elimination complete. Matrix is in reduced row echelon form (RREF).",
+        highlights: {}
+    });
 
     return { steps, solution: x, type: 'direct' };
 };
