@@ -25,6 +25,18 @@ An interactive educational tool for visualizing and understanding numerical meth
 - **Real-time solution display** - Final solution shown at completion
 - **Error convergence tracking** - For iterative methods, visualize error reduction
 
+### Algorithm Comparison Tool
+
+- **Compare All Methods** - Run all 5 algorithms simultaneously on the same system
+- **Smart Recommendations** - AI-powered algorithm selection based on system characteristics
+- **Performance Metrics** - Side-by-side comparison of:
+  - Number of steps required
+  - Convergence status
+  - Time complexity
+  - Efficiency ratings
+- **Ranked Results** - Algorithms ranked by performance for the given input
+- **Detailed Insights** - Analysis and recommendations for best algorithm choice
+
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -60,6 +72,8 @@ npm run build
 
 ## 💻 Usage
 
+### Single Method Solving
+
 1. **Select a Method** - Choose from the dropdown menu (Direct or Iterative method)
 2. **Input Matrix** - Enter the coefficient matrix A and vector b for your system Ax = b
 3. **Adjust Size** - Select matrix size (2×2, 3×3, 4×4, etc.)
@@ -67,19 +81,33 @@ npm run build
 5. **Visualize** - Use playback controls to step through the solution process
 6. **Observe** - Watch matrix transformations, pivot selections, and row operations in real-time
 
+### Comparing All Methods
+
+1. **Input your system** - Set up matrix A and vector b
+2. **Click "Compare All Methods"** - Purple button that runs all 5 algorithms
+3. **Review Recommendation** - See which algorithm is best for your system
+4. **Analyze Metrics** - View performance comparison table with:
+   - Step count for each method
+   - Convergence status
+   - Efficiency ratings
+   - Time complexity
+5. **Explore Details** - Read detailed insights about top-performing methods
+6. **Make Informed Choice** - Select algorithm based on recommendation and analysis
+
 ## 📁 Project Structure
 
 ```
 src/
 ├── components/
-│   ├── MatrixInput.jsx      # Matrix and vector input interface
-│   └── Visualizer.jsx       # Step-by-step visualization display
+│   ├── MatrixInput.jsx          # Matrix and vector input interface
+│   └── Visualizer.jsx           # Step-by-step visualization display
 ├── utils/
-│   └── solverLogic.js       # Core numerical solver implementations
-├── App.jsx                  # Main application component
-├── App.css                  # Application styles
-├── index.css                # Global styles
-└── main.jsx                 # Application entry point
+│   ├── solverLogic.js           # Core numerical solver implementations
+│   └── compareAlgorithms.js     # Algorithm comparison and ranking logic
+├── App.jsx                      # Main application component
+├── App.css                      # Application styles
+├── index.css                    # Global styles
+└── main.jsx                     # Application entry point
 ```
 
 ## 🔧 Technologies Used
@@ -105,6 +133,19 @@ These methods use an initial guess (usually zeros) and iteratively refine the so
 - Check convergence based on error tolerance
 - Stop when error < tolerance or max iterations reached
 
+### Comparison Metrics
+
+The comparison tool evaluates algorithms using:
+
+| Metric | Description |
+|--------|-------------|
+| **Steps** | Total operations/iterations to reach solution |
+| **Type** | Direct (immediate) vs Iterative (convergence-based) |
+| **Status** | Success indicator or convergence status |
+| **Efficiency** | Relative performance score (0-100%) |
+| **Complexity** | Big-O time complexity |
+| **Advantage** | Special characteristics or best use cases |
+
 ## 📝 Example: Solving a 3×3 System
 
 ```
@@ -121,15 +162,48 @@ Matrix A:
 Vector b: [1, 2, 0]
 ```
 
-Select any method, input these values, and watch the algorithm solve it step-by-step!
+**Workflow:**
+1. Input the matrix and vector
+2. Click "Compare All Methods" to see how each algorithm performs
+3. The system recommends **Gauss Elimination with Pivoting** (fastest and most stable)
+4. Select it from dropdown and click "Solve System" to watch step-by-step
+5. Alternatively, select any method to see how it approaches the problem differently
+
+**Comparison Results Example:**
+- **Gauss Elimination:** 15 steps (basic, no pivoting)
+- **Gauss with Pivoting:** 17 steps (safer, better stability)
+- **Gauss-Jordan:** 21 steps (finds RREF, more operations)
+- **Jacobi:** Converges in 12 iterations (iterative approach)
+- **Gauss-Seidel:** Converges in 8 iterations (faster convergence)
 
 ## 🎓 Educational Value
 
 - **Visual Learning** - See how each algorithm manipulates the matrix
 - **Algorithm Comparison** - Compare different methods on the same system
+- **Method Selection** - Learn which algorithm works best for different problem types
 - **Numerical Stability** - Understand why pivoting matters
 - **Convergence Analysis** - Watch iterative methods converge/diverge
 - **Step Inspection** - Pause at any step to analyze operations
+- **Performance Metrics** - Compare algorithms by steps, efficiency, and complexity
+
+### Smart Recommendation System
+
+The comparison tool automatically recommends the best algorithm based on:
+
+**For Direct Methods:**
+- Fewer steps = better efficiency
+- Numerical stability considerations
+- RREF computation requirements
+
+**For Iterative Methods:**
+- Convergence success
+- Iteration count to convergence
+- System diagonal dominance
+
+**Selection Logic:**
+- Direct methods generally preferred for smaller, well-conditioned systems
+- Iterative methods better for large, sparse systems
+- Recommends most efficient method for the specific input matrix
 
 ## 📋 Step Information Displayed
 
