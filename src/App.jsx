@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import MatrixInput from './components/MatrixInput';
 import Visualizer from './components/Visualizer';
 import { solveGaussElimination, solveGaussEliminationWithPivoting, solveGaussJordan, solveJacobi, solveGaussSeidel } from './utils/solverLogic';
+import { compareAllMethods, getRanking } from './utils/compareAlgorithms';
 import { Play, Pause, SkipBack, SkipForward, RotateCcw } from 'lucide-react';
 
 function App() {
@@ -15,6 +16,8 @@ function App() {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [speed, setSpeed] = useState(1000); // ms per step
+  const [comparison, setComparison] = useState(null);
+  const [showComparison, setShowComparison] = useState(false);
 
   // --- HANDLERS ---
   const handleSizeChange = (newSize) => {
@@ -53,6 +56,12 @@ function App() {
     // Add other methods here...
     
     setSteps(result);
+  };
+
+  const handleCompare = () => {
+    const compResult = compareAllMethods(matrix, vector);
+    setComparison(compResult);
+    setShowComparison(true);
   };
 
   // --- ANIMATION LOOP ---
@@ -102,6 +111,13 @@ function App() {
               className="w-full bg-blue-600 text-white py-3 rounded font-bold hover:bg-blue-700 transition"
             >
               Solve System
+            </button>
+
+            <button 
+              onClick={handleCompare}
+              className="w-full bg-purple-600 text-white py-3 rounded font-bold hover:bg-purple-700 transition"
+            >
+              Compare All Methods
             </button>
           </div>
 
@@ -164,6 +180,97 @@ function App() {
             </>
           )}
         </div>
+
+        {/* Comparison Section */}
+        {showComparison && comparison && (
+          <div className="mt-12">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-800">Algorithm Comparison</h2>
+              <button 
+                onClick={() => setShowComparison(false)}
+                className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition"
+              >
+                Close Comparison
+              </button>
+            </div>
+
+            {/* Best Method Recommendation */}
+            <div className="bg-gradient-to-r from-purple-100 to-blue-100 border-2 border-purple-400 rounded-lg p-6 mb-8">
+              <h3 className="text-xl font-bold text-purple-900 mb-2">
+                🎯 Recommended Method: {comparison.allMetrics[comparison.bestMethod].name}
+              </h3>
+              <p className="text-lg text-purple-800 font-semibold">{comparison.reason}</p>
+            </div>
+
+            {/* Metrics Table */}
+            <div className="bg-white rounded-lg shadow overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="bg-gray-200">
+                    <th className="border p-3 text-left font-bold">Method</th>
+                    <th className="border p-3 text-center font-bold">Type</th>
+                    <th className="border p-3 text-center font-bold">Steps</th>
+                    <th className="border p-3 text-center font-bold">Status</th>
+                    <th className="border p-3 text-center font-bold">Efficiency</th>
+                    <th className="border p-3 text-center font-bold">Complexity</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {getRanking(comparison.allMetrics).map((metric) => (
+                    <tr 
+                      key={metric.key}
+                      className={metric.key === comparison.bestMethod ? "bg-yellow-50 border-l-4 border-l-yellow-500" : ""}
+                    >
+                      <td className="border p-3 font-semibold text-gray-800">{metric.name}</td>
+                      <td className="border p-3 text-center">
+                        <span className={`px-3 py-1 rounded text-white font-bold ${metric.type === 'direct' ? 'bg-blue-500' : 'bg-orange-500'}`}>
+                          {metric.type === 'direct' ? 'Direct' : 'Iterative'}
+                        </span>
+                      </td>
+                      <td className="border p-3 text-center font-mono text-gray-700">{metric.steps}</td>
+                      <td className="border p-3 text-center">
+                        {metric.type === 'direct' ? (
+                          <span className="text-green-600 font-bold">✓ Direct</span>
+                        ) : (
+                          <span className={metric.converged ? "text-green-600 font-bold" : "text-red-600 font-bold"}>
+                            {metric.converged ? '✓ Converged' : '✗ No Conv.'}
+                          </span>
+                        )}
+                      </td>
+                      <td className="border p-3 text-center">
+                        <div className="w-full bg-gray-200 rounded-full h-6">
+                          <div 
+                            className="bg-blue-500 h-6 rounded-full flex items-center justify-center text-white font-bold text-sm"
+                            style={{ width: `${metric.efficiency * 100}%` }}
+                          >
+                            {(metric.efficiency * 100).toFixed(0)}%
+                          </div>
+                        </div>
+                      </td>
+                      <td className="border p-3 text-center font-mono text-gray-700">{metric.timeComplexity}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Details Section */}
+            <div className="grid md:grid-cols-2 gap-6 mt-8">
+              {getRanking(comparison.allMetrics).slice(0, 2).map((metric) => (
+                <div key={metric.key} className="bg-white p-6 rounded-lg shadow border-l-4 border-l-blue-500">
+                  <h4 className="text-lg font-bold text-gray-800 mb-3">{metric.name}</h4>
+                  <div className="space-y-2 text-sm">
+                    <p><span className="font-semibold">Type:</span> {metric.type === 'direct' ? 'Direct Method' : 'Iterative Method'}</p>
+                    <p><span className="font-semibold">Steps:</span> {metric.steps}</p>
+                    <p><span className="font-semibold">Complexity:</span> {metric.timeComplexity}</p>
+                    {metric.advantage && <p className="text-green-700 font-semibold">💡 {metric.advantage}</p>}
+                    {metric.description && <p className="text-gray-600 italic">{metric.description}</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
