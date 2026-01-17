@@ -172,8 +172,6 @@ Contributions are welcome! Feel free to:
 
 ## 📄 License
 
-This project is open source and available under the MIT License.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## 🙋 Support
-
-For questions or issues, please open an issue on the repository or contact the development team.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
